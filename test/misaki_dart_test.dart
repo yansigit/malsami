@@ -89,7 +89,31 @@ void main() {
     final (phonemes, tokens) = await g2p.convert(text);
     expect(phonemes, contains('misˈɑki'));
     expect(phonemes, anyOf(contains('ɪz'), contains('ɪs')));
-    expect(phonemes, contains('ɛnʤɪn'));
+    expect(phonemes, contains('ˈɛnʤən'));
     expect(phonemes, contains('kˈOkəɹO'));
+  });
+
+  test('converts numbers to phonemes', () async {
+    final g2p = EnglishG2P();
+    await g2p.initialize();
+    final text = 'The numbers are 1, 2, 3, 4, 5, 10, 100, and 1000.';
+    final (phonemes, tokens) = await g2p.convert(text);
+
+    // Test basic single-digit numbers (with stress marks from dictionary)
+    expect(phonemes, contains('wˈʌn')); // 1 -> one
+    expect(phonemes, contains('tˈu')); // 2 -> two
+    expect(phonemes, contains('θɹˈi')); // 3 -> three
+    expect(phonemes, contains('fˈɔɹ')); // 4 -> four
+    expect(phonemes, contains('fˈIv')); // 5 -> five
+    expect(phonemes, contains('tˈɛn')); // 10 -> ten
+
+    // Test compound numbers
+    expect(phonemes, contains('hˈʌndɹəd')); // 100 -> one hundred
+    expect(phonemes, contains('θˈWzᵊnd')); // 1000 -> one thousand
+
+    // Test other words in the sentence
+    expect(phonemes, anyOf(contains('ðə'), contains('ði'))); // the
+    expect(phonemes, contains('ɑɹ')); // are
+    expect(phonemes, contains('ænd')); // and
   });
 }

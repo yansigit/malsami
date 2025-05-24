@@ -1,6 +1,6 @@
 name: malsami
 description: "A Dart implementation of Malsami G2P (Grapheme-to-Phoneme) engine for Flutter"
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/yansigit
 repository: https://github.com/yansigit/malsami
 

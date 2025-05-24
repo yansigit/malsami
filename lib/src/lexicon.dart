@@ -124,16 +124,17 @@ class Lexicon {
     String word,
     String tag,
     double? stress,
-    TokenContext ctx,
-  ) {
+    TokenContext ctx, {
+    int depth = 0,
+  }) {
     // Handle additional symbols
     if (tag == 'ADD' && addSymbols.containsKey(word)) {
-      return lookup(addSymbols[word]!, null, -0.5, ctx);
+      return lookup(addSymbols[word]!, null, -0.5, ctx, depth: depth + 1);
     }
 
     // Handle common symbols
     if (symbols.containsKey(word)) {
-      return lookup(symbols[word]!, null, null, ctx);
+      return lookup(symbols[word]!, null, null, ctx, depth: depth + 1);
     }
 
     // Handle abbreviations with periods
@@ -206,7 +207,7 @@ class Lexicon {
 
     // Handle 'vs' and 'vs.'
     if (tag == 'IN' && RegExp(r'(?i)vs\.?$').hasMatch(word)) {
-      return lookup('versus', null, null, ctx);
+      return lookup('versus', null, null, ctx, depth: depth + 1);
     }
 
     // Handle 'used', 'Used', 'USED'
@@ -238,11 +239,22 @@ class Lexicon {
     String word,
     String? tag,
     double? stress,
-    TokenContext ctx,
-  ) {
+    TokenContext ctx, {
+    int depth = 0,
+  }) {
+    // Prevent infinite recursion
+    if (depth > 5) {
+      return (null, null);
+    }
     // Handle special cases first
     if (tag != null) {
-      final (specialPs, specialRating) = getSpecialCase(word, tag, stress, ctx);
+      final (specialPs, specialRating) = getSpecialCase(
+        word,
+        tag,
+        stress,
+        ctx,
+        depth: depth,
+      );
       if (specialPs != null) {
         return (specialPs, specialRating);
       }
@@ -289,7 +301,13 @@ class Lexicon {
         word[0] == word[0].toUpperCase() &&
         word != word.toUpperCase()) {
       // Try lowercase version
-      final (lowerPs, lowerRating) = lookup(word.toLowerCase(), tag, null, ctx);
+      final (lowerPs, lowerRating) = lookup(
+        word.toLowerCase(),
+        tag,
+        null,
+        ctx,
+        depth: depth + 1,
+      );
       if (lowerPs != null) {
         return (applyStress(lowerPs, capStresses[0]), lowerRating);
       }
@@ -298,7 +316,13 @@ class Lexicon {
     // Handle all-caps words
     if (word == word.toUpperCase() && word.length > 1) {
       // Try lowercase version
-      final (lowerPs, lowerRating) = lookup(word.toLowerCase(), tag, null, ctx);
+      final (lowerPs, lowerRating) = lookup(
+        word.toLowerCase(),
+        tag,
+        null,
+        ctx,
+        depth: depth + 1,
+      );
       if (lowerPs != null) {
         return (applyStress(lowerPs, capStresses[1]), lowerRating);
       }
